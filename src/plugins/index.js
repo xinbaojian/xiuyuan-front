@@ -6,6 +6,7 @@ import "@/config/permission";
 import VabPermissions from "layouts/Permissions";
 import Vab from "@/utils/vab";
 import ElementPlus from "element-plus";
+import zhCn from "element-plus/dist/locale/zh-cn.mjs";
 import "element-plus/dist/index.css";
 import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 import { faToElIcon } from "@/utils/vab";
@@ -29,8 +30,10 @@ const VabIcon = {
 };
 
 export default (app) => {
-  // 注册Element Plus
-  app.use(ElementPlus);
+  // 注册Element Plus，配置中文语言包
+  app.use(ElementPlus, {
+    locale: zhCn,
+  });
 
   // 注册所有Element Plus图标
   for (const [key, component] of Object.entries(ElementPlusIconsVue)) {

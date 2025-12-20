@@ -51,25 +51,26 @@ export const asyncRoutes = [
       },
     ],
   },
-
-  /* {
-    path: "/test",
+  {
+    path: "/setting",
     component: Layout,
     redirect: "noRedirect",
+    name: "Setting",
+    alwaysShow: true,
+    meta: { title: "系统设置", icon: "Setting", defaultOpen: true },
     children: [
       {
-        path: "test",
-        name: "Test",
-        component: () => import("@/views/test/index"),
+        path: "role",
+        name: "Role",
+        component: () => import("@/views/setting/role/index.vue"),
         meta: {
-          title: "test",
-          icon: "marker",
-          permissions: ["admin"],
+          title: "角色管理",
+          // permissions: ["admin"], // 临时注释掉权限检查
+          icon: "user",
         },
       },
     ],
-  }, */
-
+  },
   {
     path: "/vab",
     component: Layout,
@@ -321,43 +322,6 @@ export const asyncRoutes = [
       //     permissions: ["admin"],
       //   },
       // },
-    ],
-  },
-
-  {
-    path: "/external-store",
-    component: Layout,
-    meta: {
-      title: "",
-      icon: "",
-    },
-    children: [
-      {
-        path: "https://vuejs-core.cn/store",
-        meta: {
-          title: "模板市场",
-          target: "_blank",
-          icon: "box-open",
-        },
-      },
-    ],
-  },
-  {
-    path: "/external-job",
-    component: Layout,
-    meta: {
-      title: "",
-      icon: "",
-    },
-    children: [
-      {
-        path: "https://job.vuejs-core.cn/posts",
-        meta: {
-          title: "找工作",
-          target: "_blank",
-          icon: "horse-head",
-        },
-      },
     ],
   },
   {
