@@ -106,36 +106,8 @@ instance.interceptors.response.use(
   (response) => {
     if (loadingInstance) loadingInstance.close();
 
-    const { data, config } = response;
-
-    // 判断data是否为undefined或null
-    if (data === undefined || data === null) {
-      ElMessage.error("后端接口返回数据为空");
-      return Promise.reject("后端接口返回数据为空");
-    }
-
-    // 安全地解构code和msg，避免undefined异常
-    const code = data.code !== undefined ? data.code : null;
-    const msg = data.msg !== undefined ? data.msg : "未知错误";
-
-    // 操作正常Code数组
-    const codeVerificationArray = isArray(successCode)
-      ? [...successCode]
-      : [...[successCode]];
-
-    // 是否操作正常
-    if (code !== null && codeVerificationArray.includes(code)) {
-      return data;
-    } else {
-      handleCode(code, msg);
-      return Promise.reject(
-        `vue-admin-better请求异常拦截:${JSON.stringify({
-          url: config.url,
-          code,
-          msg,
-        })}` || "Error"
-      );
-    }
+    // 只要HTTP状态码是2xx就认为是成功
+    return response.data;
   },
   (error) => {
     if (loadingInstance) loadingInstance.close();
@@ -173,9 +145,20 @@ instance.interceptors.response.use(
     }
 
     const { response, message } = error;
-    if (response && response.data) {
+    if (response) {
       const { status, data } = response;
-      handleCode(status, data.msg || message || "未知错误");
+      
+      // 如果是401未授权，清空本地token并跳转到登录页
+      if (status === 401) {
+        store.dispatch("user/resetAccessToken");
+        router.push({ path: "/login" }).catch(() => {});
+        ElMessage.error("登录已过期，请重新登录");
+        return Promise.reject(error);
+      }
+      
+      // 其他错误状态码处理
+      const errorMsg = data?.message || data?.msg || message || "未知错误";
+      ElMessage.error(errorMsg);
       return Promise.reject(error);
     } else {
       let errorMsg = "后端接口未知异常";

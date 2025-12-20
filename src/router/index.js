@@ -57,7 +57,7 @@ export const asyncRoutes = [
     redirect: "noRedirect",
     name: "Setting",
     alwaysShow: true,
-    meta: { title: "系统设置", icon: "Setting", defaultOpen: true },
+    meta: { title: "系统设置", icon: "cog", defaultOpen: true },
     children: [
       {
         path: "role",
@@ -65,8 +65,18 @@ export const asyncRoutes = [
         component: () => import("@/views/setting/role/index.vue"),
         meta: {
           title: "角色管理",
-          // permissions: ["admin"], // 临时注释掉权限检查
+          permissions: ["admin"],
           icon: "user",
+        },
+      },
+      {
+        path: "dept",
+        name: "Dept",
+        component: () => import("@/views/setting/dept/index.vue"),
+        meta: {
+          title: "部门管理",
+          permissions: ["admin"],
+          icon: "sitemap",
         },
       },
     ],
