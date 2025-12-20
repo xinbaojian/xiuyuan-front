@@ -49,7 +49,7 @@ if (process.env.NODE_ENV === "production") {
   console.log("生产环境已启用Mock拦截，所有接口请求将被Mock拦截");
 }
 // 打印layouts/index.js中的信息到控制台
-printLayoutsInfo();
+// printLayoutsInfo();
 
 // 挂载应用
 app.mount("#vue-admin-better");

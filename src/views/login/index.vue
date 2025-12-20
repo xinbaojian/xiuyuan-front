@@ -52,7 +52,7 @@
 
           <div class="form-actions">
             <el-checkbox v-model="rememberMe">记住我</el-checkbox>
-            <a href="javascript:;" class="forgot-password">忘记密码?</a>
+            <!-- <a href="javascript:;" class="forgot-password">忘记密码?</a> -->
           </div>
 
           <el-button
@@ -64,12 +64,12 @@
             登录
           </el-button>
 
-          <div class="register-link">
+          <!-- <div class="register-link">
             <span>还没有账号?</span>
             <router-link to="/register" class="create-account">
               立即注册
             </router-link>
-          </div>
+          </div> -->
         </el-form>
       </div>
 

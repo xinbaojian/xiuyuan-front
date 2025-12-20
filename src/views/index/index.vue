@@ -1,24 +1,6 @@
 <template>
   <div class="index-container">
     <el-row :gutter="20">
-      <el-col :lg="24" :md="24" :sm="24" :xl="24" :xs="24">
-        <el-alert v-if="noticeList">
-          <div
-            style="display: flex; align-items: center; justify-content: center"
-          >
-            <a
-              href="https://github.com/zxwk1998/vue-admin-better"
-              target="_blank"
-            >
-              <img
-                src="https://img.shields.io/github/stars/zxwk1998/vue-admin-better?style=flat-square&label=Stars&logo=github"
-                style="margin-right: 10px"
-              />
-            </a>
-            <p v-html="noticeList.notice"></p>
-          </div>
-        </el-alert>
-      </el-col>
       <el-col
         v-for="(item, index) in iconList"
         :key="index"
@@ -300,7 +282,7 @@
 <script>
 import VabChart from "@/plugins/echarts";
 import { dependencies, devDependencies } from "../../../package.json";
-import { getNoticeList } from "@/api/notice";
+// import { getNoticeList } from "@/api/notice";
 import { random } from "lodash-es";
 import {
   View,
@@ -783,7 +765,6 @@ export default {
     };
   },
   created() {
-    this.fetchData();
     const now = new Date();
     const oneDay = 3600 * 1000 * 24;
     const date = [];
@@ -864,14 +845,6 @@ export default {
       // this.$baseEventBus.$emit('theme')
       // 直接打开主题设置
       this.drawerVisible = true;
-    },
-    async fetchData() {
-      try {
-        const res = await getNoticeList();
-        this.noticeList = res.data;
-      } catch (error) {
-        console.error("获取通知列表失败:", error);
-      }
     },
     handleIconClick(item) {
       if (item.link) {
