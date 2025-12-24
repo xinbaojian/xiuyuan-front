@@ -74,6 +74,24 @@ export function updateUser(id, data) {
 }
 
 /**
+ * 重置用户密码
+ * @param id 用户ID
+ * @param newPassword 新密码（可选，不传则使用系统默认密码）
+ * @returns 结果
+ */
+export function resetUserPassword(id, newPassword) {
+  const data = {};
+  if (newPassword) {
+    data.newPassword = newPassword;
+  }
+  return request({
+    url: `/user/resetPwd/${id}`,
+    method: 'post',
+    data,
+  });
+}
+
+/**
  * 删除用户
  * @param id 用户ID
  * @returns 结果

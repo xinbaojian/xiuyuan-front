@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__xiuyuan-admin_-_API_____read_project_oas_8m3pjl",
+      "mcp__xiuyuan-admin_-_API_____read_project_oas_ref_resources_8m3pjl",
+      "mcp__xiuyuan-admin_-_API_____read_project_oas_fi8z2y",
+      "mcp__xiuyuan-admin_-_API_____read_project_oas_ref_resources_fi8z2y",
+      "mcp__xiuyuan-admin_-_API_____refresh_project_oas_fi8z2y",
+      "mcp__xiuyuan-admin_-_API_____read_project_oas_xlg9w4",
+      "mcp__xiuyuan-admin_-_API_____read_project_oas_ref_resources_xlg9w4",
+      "mcp__chrome-devtools-mcp__list_pages",
+      "mcp__xiuyuan-admin_-_API_____refresh_project_oas_xlg9w4"
+    ]
+  }
+}

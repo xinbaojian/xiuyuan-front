@@ -1,15 +1,23 @@
 <template>
-  <div class="role-connainer">
+  <div class="post-container">
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>角色管理</span>
+          <span>岗位管理</span>
           <div class="header-actions">
-            <el-input v-model="listQuery.roleName" placeholder="搜索角色..." clearable
+            <el-input v-model="listQuery.postName" placeholder="搜索岗位..." clearable
               style="width: 200px; margin-right: 10px">
               <template #prefix>
                 <el-icon>
                   <Search />
+                </el-icon>
+              </template>
+            </el-input>
+            <el-input v-model="listQuery.postCode" placeholder="岗位编码" clearable
+              style="width: 150px; margin-right: 10px">
+              <template #prefix>
+                <el-icon>
+                  <Key />
                 </el-icon>
               </template>
             </el-input>
@@ -19,16 +27,16 @@
               <el-option label="禁用" value="DISABLE"></el-option>
             </el-select>
             <el-button type="primary" @click="fetchList">查询</el-button>
-            <el-button type="primary" @click="openCreate">添加角色</el-button>
+            <el-button type="primary" @click="openCreate">添加岗位</el-button>
           </div>
         </div>
       </template>
 
       <el-table v-loading="listLoading" :data="list" style="width:100%">
-        <el-table-column prop="roleName" label="角色名称" min-width="120" />
-        <el-table-column prop="roleKey" label="编码" min-width="120" />
-        <el-table-column prop="orderNum" label="排序" min-width="80" />
-        <el-table-column prop="status" label="状态" min-width="120" >
+        <el-table-column prop="postName" label="岗位名称" min-width="150" />
+        <el-table-column prop="postCode" label="岗位编码" min-width="120" />
+        <el-table-column prop="orderNum" label="排序" min-width="80" align="center" />
+        <el-table-column prop="status" label="状态" min-width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="row.status === 'NORMAL' ? 'success' : 'info'">
               {{ row.status === 'NORMAL' ? '正常' : '禁用' }}
@@ -36,11 +44,11 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" min-width="160" />
-        <el-table-column prop="remark" label="备注" />
-        <el-table-column fixed="right" label="操作" min-width="180">
+        <el-table-column prop="remark" label="备注" min-width="200" show-overflow-tooltip />
+        <el-table-column fixed="right" label="操作" min-width="180" align="center">
           <template #default="{ row }">
             <el-button type="text" @click="openEdit(row)">编辑</el-button>
-            <el-button type="text" @click="handleDelete(row)">删除</el-button>
+            <el-button type="text" @click="handleDelete(row)" style="color: #f56c6c;">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -54,11 +62,11 @@
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="520px">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
-        <el-form-item label="角色名称" prop="roleName">
-          <el-input v-model="form.roleName" placeholder="请输入角色名称" />
+        <el-form-item label="岗位名称" prop="postName">
+          <el-input v-model="form.postName" placeholder="请输入岗位名称" />
         </el-form-item>
-        <el-form-item label="角色编码" prop="roleKey">
-          <el-input v-model="form.roleKey" placeholder="请输入角色编码" />
+        <el-form-item label="岗位编码" prop="postCode">
+          <el-input v-model="form.postCode" placeholder="请输入岗位编码" />
         </el-form-item>
         <el-form-item label="显示顺序" prop="orderNum">
           <el-input-number v-model="form.orderNum" :min="0" :max="999" controls-position="right" />
@@ -84,29 +92,36 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { getList, doCreate, doEdit, doDelete, getDetail } from "@/api/role";
+import { Search, Key } from "@element-plus/icons-vue";
+import { getList, doCreate, doEdit, doDelete } from "@/api/post";
 
 const list = ref([]);
 const totalCount = ref(0);
 const listLoading = ref(false);
 
-const listQuery = reactive({ pageNo: 1, pageSize: 20, roleName: "", roleKey: "", status: "" });
+const listQuery = reactive({
+  pageNo: 1,
+  pageSize: 20,
+  postName: "",
+  postCode: "",
+  status: ""
+});
 
 const dialogVisible = ref(false);
-const dialogTitle = ref("新建角色");
+const dialogTitle = ref("新建岗位");
 const formRef = ref(null);
-const form = reactive({ 
-  id: null, 
-  roleName: "", 
-  roleKey: "", 
-  orderNum: 0, 
-  status: "NORMAL", 
-  remark: "" 
+const form = reactive({
+  id: null,
+  postName: "",
+  postCode: "",
+  orderNum: 0,
+  status: "NORMAL",
+  remark: ""
 });
 
 const rules = {
-  roleName: [{ required: true, message: "请输入角色名称", trigger: "blur" }],
-  roleKey: [{ required: true, message: "请输入角色编码", trigger: "blur" }],
+  postName: [{ required: true, message: "请输入岗位名称", trigger: "blur" }],
+  postCode: [{ required: true, message: "请输入岗位编码", trigger: "blur" }],
   status: [{ required: true, message: "请选择状态", trigger: "change" }],
 };
 
@@ -116,18 +131,18 @@ async function fetchList() {
     const response = await getList({
       pageNo: listQuery.pageNo,
       pageSize: listQuery.pageSize,
-      roleName: listQuery.roleName,
-      roleKey: listQuery.roleKey,
+      postName: listQuery.postName,
+      postCode: listQuery.postCode,
       status: listQuery.status,
     });
-    const pageData = (response && response.data && response.data.data) ? response.data.data : { list: [], total: 0 };
-    list.value = Array.isArray(pageData.list) ? pageData.list : [];
-    totalCount.value = Number(pageData.total) || 0;
+
+    list.value = response.data.list;
+    totalCount.value = response.data.total || 0;
   } catch (e) {
     console.error('fetchList error:', e);
     list.value = [];
     totalCount.value = 0;
-    ElMessage.error('获取角色列表失败');
+    ElMessage.error('获取岗位列表失败');
   } finally {
     listLoading.value = false;
   }
@@ -135,6 +150,7 @@ async function fetchList() {
 
 function handleSizeChange(val) {
   listQuery.pageSize = val;
+  listQuery.pageNo = 1;
   fetchList();
 }
 
@@ -144,10 +160,10 @@ function handleCurrentChange(val) {
 }
 
 function openCreate() {
-  dialogTitle.value = "新建角色";
+  dialogTitle.value = "新建岗位";
   form.id = null;
-  form.roleName = "";
-  form.roleKey = "";
+  form.postName = "";
+  form.postCode = "";
   form.orderNum = 0;
   form.status = "NORMAL";
   form.remark = "";
@@ -155,13 +171,13 @@ function openCreate() {
 }
 
 async function openEdit(row) {
-  dialogTitle.value = "编辑角色";
-  
+  dialogTitle.value = "编辑岗位";
+
   // 直接使用表格行数据填充表单
   form.id = row.id;
-  form.roleName = row.roleName || "";
-  form.roleKey = row.roleKey || "";
-  form.orderNum = row.orderNum || 0;
+  form.postName = row.postName || "";
+  form.postCode = row.postCode || "";
+  form.orderNum = row.orderNum !== undefined && row.orderNum !== null ? row.orderNum : 0;
   form.status = row.status || "NORMAL";
   form.remark = row.remark || "";
 
@@ -174,20 +190,20 @@ function submitForm() {
     try {
       // 准备提交的数据
       const submitData = {
-        roleName: form.roleName,
-        roleKey: form.roleKey,
+        postName: form.postName,
+        postCode: form.postCode,
         orderNum: form.orderNum,
         status: form.status,
         remark: form.remark,
       };
 
       if (form.id) {
-        // 编辑角色
+        // 编辑岗位
         submitData.id = form.id;
         await doEdit(submitData);
         ElMessage.success("更新成功");
       } else {
-        // 新增角色
+        // 新增岗位
         await doCreate(submitData);
         ElMessage.success("创建成功");
       }
@@ -201,7 +217,7 @@ function submitForm() {
 }
 
 function handleDelete(row) {
-  ElMessageBox.confirm("确定删除该角色吗？", "提示", { type: "warning" })
+  ElMessageBox.confirm("确定删除该岗位吗？", "提示", { type: "warning" })
     .then(async () => {
       try {
         await doDelete({ id: row.id });
@@ -220,7 +236,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.role-connainer {
+.post-container {
   padding: 20px;
 
   .card-header {
@@ -230,27 +246,21 @@ onMounted(() => {
     font-weight: bold;
   }
 
-  .task-title {
+  .header-actions {
     display: flex;
     align-items: center;
-  }
-
-  .completed-task {
-    text-decoration: line-through;
-    color: #909399;
-  }
-
-  .task-description {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    gap: 10px;
   }
 
   .pagination-container {
     margin-top: 20px;
     text-align: right;
+  }
+
+  :deep(.el-table) {
+    .el-button--text {
+      padding: 0 8px;
+    }
   }
 }
 </style>

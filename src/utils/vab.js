@@ -50,6 +50,7 @@ export const faToElIcon = (icon) => {
     "expand-arrows-alt": "FullScreen",
     "compress-arrows-alt": "ScaleToOriginal",
     redo: "Refresh",
+    office: "OfficeBuilding",
 
     // 基础图标
     home: "HomeFilled",

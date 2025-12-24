@@ -43,11 +43,11 @@
         style="width: 100%"
       >
         <el-table-column prop="name" label="部门名称" min-width="120" />
-        <el-table-column prop="orderNum" label="排序" min-width="80" />
+        <el-table-column prop="orderNum" label="排序" min-width="60" />
         <el-table-column prop="leader" label="负责人" min-width="120" />
-        <el-table-column prop="phone" label="联系电话" min-width="120" />
+        <el-table-column prop="phone" label="联系电话" min-width="180" />
         <el-table-column prop="email" label="邮箱" min-width="180" />
-        <el-table-column prop="status" label="状态" min-width="120">
+        <el-table-column prop="status" label="状态" min-width="80">
           <template #default="scope">
             <el-tag :type="scope.row.status === 'NORMAL' ? 'success' : 'info'">
               {{ scope.row.status === "NORMAL" ? "正常" : "禁用" }}
