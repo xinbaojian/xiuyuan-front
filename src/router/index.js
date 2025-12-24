@@ -66,7 +66,6 @@ export const asyncRoutes = [
         meta: {
           title: "角色管理",
           permissions: ["admin"],
-          icon: "user",
         },
       },
       {
@@ -76,7 +75,24 @@ export const asyncRoutes = [
         meta: {
           title: "部门管理",
           permissions: ["admin"],
-          icon: "sitemap",
+        },
+      },
+      {
+        path: "post",
+        name: "Post",
+        component: () => import("@/views/setting/post/index.vue"),
+        meta: {
+          title: "岗位管理",
+          permissions: ["admin"],
+        },
+      },
+      {
+        path: "user",
+        name: "User",
+        component: () => import("@/views/setting/user/index.vue"),
+        meta: {
+          title: "用户管理",
+          permissions: ["admin"],
         },
       },
     ],

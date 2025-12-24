@@ -51,3 +51,15 @@ export function deleteDept(id) {
     method: "delete",
   });
 }
+
+/**
+ * 获取部门下拉树形列表
+ * @returns 部门下拉树
+ */
+export function getDeptOptions() {
+  return request({
+    url: "/dept/tree",
+    method: "get",
+    params: { status: "NORMAL" }
+  });
+}

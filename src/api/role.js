@@ -38,3 +38,14 @@ export function getDetail(id) {
     method: "get",
   });
 }
+
+/**
+ * 获取角色下拉列表
+ * @returns 角色下拉列表
+ */
+export function getRoleOptions() {
+  return request({
+    url: "/role/options",
+    method: "get",
+  });
+}
