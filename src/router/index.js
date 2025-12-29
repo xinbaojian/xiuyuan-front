@@ -399,6 +399,15 @@ const router = createRouter({
   },
 });
 
+// 在路由安装后，检查当前 URL 是否为 /noRedirect，如果是则重定向到首页
+router.isReady().then(() => {
+  const currentPath = router.currentRoute.value.path
+  if (currentPath === '/noRedirect' || currentPath === 'noRedirect') {
+    console.log('检测到无效路径 /noRedirect，重定向到首页')
+    router.replace('/')
+  }
+})
+
 export function resetRouter() {
   // 注意：所有动态路由路由必须带有name属性，否则可能会不能完全重置干净
   try {

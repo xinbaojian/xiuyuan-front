@@ -29,6 +29,14 @@ router.beforeEach(async (to, from, next) => {
 
   if (!loginInterception) hasToken = true;
 
+  // 处理无效路径 /noRedirect
+  if (to.path === '/noRedirect' || to.path === 'noRedirect') {
+    console.log('检测到无效路径 /noRedirect，重定向到首页')
+    next({ path: '/', replace: true })
+    if (progressBar) VabProgress.done()
+    return
+  }
+
   if (hasToken) {
     if (to.path === "/login") {
       next({ path: "/" });
@@ -63,24 +71,46 @@ router.beforeEach(async (to, from, next) => {
             accessRoutes = await store.dispatch("routes/setAllRoutes");
           }
 
+          console.log('准备添加路由，accessRoutes:', accessRoutes)
+          console.log('accessRoutes 类型:', typeof accessRoutes)
+          console.log('accessRoutes 是否为数组:', Array.isArray(accessRoutes))
+
           // 确保accessRoutes是数组
           if (!Array.isArray(accessRoutes)) {
             console.error("路由数据格式错误:", accessRoutes);
             accessRoutes = [];
           }
 
+          console.log('开始添加路由，路由数量:', accessRoutes.length)
+
           // 添加路由
           accessRoutes.forEach((item) => {
+            console.log('添加路由:', item.path || item.name)
             router.addRoute(item);
           });
+
+          console.log('路由添加完成，当前路由列表:', router.getRoutes())
 
           // 确保路由添加完成后，跳转到目标页面
           next({ ...to, replace: true });
         } catch (error) {
           console.error("路由守卫错误:", error);
-          ElMessage.error(error.message || "发生错误，请重新登录");
-          await store.dispatch("user/resetAccessToken");
-          next(`/login?redirect=${to.path}`);
+
+          // 检查是否是动态菜单加载失败
+          const isDynamicMenuError = error.message && error.message.includes('获取菜单树失败');
+          const isDev = process.env.NODE_ENV === 'development';
+          const { dynamicMenuFallback } = require('@/config/setting.config.js');
+
+          // 如果是动态菜单加载失败且开发环境允许降级，尝试使用硬编码路由
+          if (isDynamicMenuError && isDev && dynamicMenuFallback) {
+            console.warn('动态菜单加载失败，使用硬编码路由作为降级方案');
+            ElMessage.warning('动态菜单加载失败，已切换到硬编码路由模式');
+            next({ ...to, replace: true });
+          } else {
+            ElMessage.error(error.message || "发生错误，请重新登录");
+            await store.dispatch("user/resetAccessToken");
+            next(`/login?redirect=${to.path}`);
+          }
           if (progressBar) VabProgress.done();
         }
       }
