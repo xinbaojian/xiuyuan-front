@@ -57,7 +57,7 @@ export const asyncRoutes = [
     redirect: "noRedirect",
     name: "Setting",
     alwaysShow: true,
-    meta: { title: "系统设置", icon: "cog", defaultOpen: true },
+    meta: { title: "系统设置", icon: "cog", defaultOpen: false },
     children: [
       {
         path: "role",
@@ -95,6 +95,15 @@ export const asyncRoutes = [
           permissions: ["admin"],
         },
       },
+      {
+        path: "menu",
+        name: "Menu",
+        component: () => import("@/views/setting/menu/index.vue"),
+        meta: {
+          title: "菜单管理",
+          permissions: ["admin"],
+        },
+      },
     ],
   },
   {
@@ -103,7 +112,7 @@ export const asyncRoutes = [
     redirect: "noRedirect",
     name: "Vab",
     alwaysShow: true,
-    meta: { title: "组件", icon: "box-open", defaultOpen: true },
+    meta: { title: "组件", icon: "box-open", defaultOpen: false },
     children: [
       {
         path: "vue3Demo",
