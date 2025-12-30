@@ -148,7 +148,14 @@ instance.interceptors.response.use(
     const { response, message } = error;
     if (response) {
       const { status, data } = response;
-      
+
+      // 如果是403禁止访问，显示权限不足提示，不抛出错误
+      if (status === 403) {
+        const errorMsg = data?.message || data?.msg || "没有权限访问此资源";
+        ElMessage.warning(errorMsg);
+        return Promise.resolve({ data: null, code: status, message: errorMsg });
+      }
+
       // 如果是401未授权，清空本地token并跳转到登录页
       if (status === 401) {
         store.dispatch("user/resetAccessToken");
@@ -156,7 +163,7 @@ instance.interceptors.response.use(
         ElMessage.error("登录已过期，请重新登录");
         return Promise.reject(error);
       }
-      
+
       // 其他错误状态码处理
       const errorMsg = data?.message || data?.msg || message || "未知错误";
       ElMessage.error(errorMsg);
