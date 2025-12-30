@@ -49,3 +49,29 @@ export function getRoleOptions() {
     method: "get",
   });
 }
+
+/**
+ * 获取角色的菜单权限
+ * @param {string} roleId 角色ID
+ * @returns 角色的菜单权限列表
+ */
+export function getRolePermissions(roleId) {
+  return request({
+    url: `/role/${roleId}/permission`,
+    method: "get",
+  });
+}
+
+/**
+ * 设置角色菜单权限
+ * @param {string} roleId 角色ID
+ * @param {Array} menuIds 菜单ID数组
+ * @returns 设置结果
+ */
+export function setRolePermissions(roleId, menuIds) {
+  return request({
+    url: `/role/${roleId}/permission`,
+    method: "put",
+    data: menuIds,
+  });
+}

@@ -37,9 +37,10 @@
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" min-width="160" />
         <el-table-column prop="remark" label="备注" />
-        <el-table-column fixed="right" label="操作" min-width="180">
+        <el-table-column fixed="right" label="操作" min-width="220">
           <template #default="{ row }">
             <el-button type="text" @click="openEdit(row)">编辑</el-button>
+            <el-button type="text" @click="openPermission(row)">设置权限</el-button>
             <el-button type="text" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
@@ -78,13 +79,45 @@
         <el-button type="primary" @click="submitForm">保存</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="permissionDialogVisible" title="设置角色权限" width="600px">
+      <div class="permission-tree-wrapper">
+        <el-tree
+          ref="permissionTreeRef"
+          :data="menuTreeData"
+          :props="treeProps"
+          show-checkbox
+          node-key="id"
+          :default-expand-all="true"
+          :check-strictly="true"
+          style="height: 400px; overflow-y: auto;"
+        >
+          <template #default="{ node, data }">
+            <span class="custom-tree-node">
+              <el-icon v-if="data.meta && data.meta.icon" style="margin-right: 5px;">
+                <component :is="data.meta.icon" />
+              </el-icon>
+              <span>{{ data.meta && data.meta.title ? data.meta.title : data.title || node.label }}</span>
+              <el-tag v-if="data.meta && data.meta.permissions" size="small" style="margin-left: 8px;">
+                {{ data.meta.permissions }}
+              </el-tag>
+            </span>
+          </template>
+        </el-tree>
+      </div>
+      <template #footer>
+        <el-button @click="permissionDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitPermission" :loading="permissionSubmitting">保存</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { getList, doCreate, doEdit, doDelete, getDetail } from "@/api/role";
+import { getList, doCreate, doEdit, doDelete, getDetail, getRolePermissions, setRolePermissions } from "@/api/role";
+import { getMenuTree } from "@/api/menu";
 
 const list = ref([]);
 const totalCount = ref(0);
@@ -95,14 +128,25 @@ const listQuery = reactive({ pageNo: 1, pageSize: 20, roleName: "", roleKey: "",
 const dialogVisible = ref(false);
 const dialogTitle = ref("新建角色");
 const formRef = ref(null);
-const form = reactive({ 
-  id: null, 
-  roleName: "", 
-  roleKey: "", 
-  orderNum: 0, 
-  status: "NORMAL", 
-  remark: "" 
+const form = reactive({
+  id: null,
+  roleName: "",
+  roleKey: "",
+  orderNum: 0,
+  status: "NORMAL",
+  remark: ""
 });
+
+// 权限设置相关
+const permissionDialogVisible = ref(false);
+const permissionTreeRef = ref(null);
+const menuTreeData = ref([]);
+const currentRoleId = ref(null);
+const permissionSubmitting = ref(false);
+const treeProps = {
+  children: "children",
+  label: "label",
+};
 
 const rules = {
   roleName: [{ required: true, message: "请输入角色名称", trigger: "blur" }],
@@ -120,7 +164,7 @@ async function fetchList() {
       roleKey: listQuery.roleKey,
       status: listQuery.status,
     });
-    const pageData = (response && response.data && response.data.data) ? response.data.data : { list: [], total: 0 };
+    const pageData = (response && response.data) ? response.data : { list: [], total: 0 };
     list.value = Array.isArray(pageData.list) ? pageData.list : [];
     totalCount.value = Number(pageData.total) || 0;
   } catch (e) {
@@ -214,6 +258,91 @@ function handleDelete(row) {
     .catch(() => { });
 }
 
+async function openPermission(row) {
+  try {
+    currentRoleId.value = row.id;
+    permissionDialogVisible.value = true;
+
+    // 获取菜单树
+    const menuResponse = await getMenuTree({});
+    if (menuResponse && menuResponse.data) {
+      // 处理菜单树数据，添加label字段用于显示
+      menuTreeData.value = processMenuTree(menuResponse.data);
+    } else {
+      menuTreeData.value = [];
+    }
+
+    // 获取角色已有的菜单权限
+    const roleMenuResponse = await getRolePermissions(row.id);
+    let checkedMenuIds = [];
+    if (roleMenuResponse && roleMenuResponse.data) {
+      // 后端返回的是菜单对象数组，需要提取出id
+      const menuObjects = Array.isArray(roleMenuResponse.data) ? roleMenuResponse.data : [];
+      checkedMenuIds = menuObjects.map(menu => menu.id);
+      console.log('角色已有权限ID列表:', checkedMenuIds);
+    }
+
+    // 使用 nextTick 确保树组件已渲染完成
+    await nextTick();
+
+    // 设置选中的菜单（使用严格模式，只选中指定的节点）
+    if (permissionTreeRef.value) {
+      permissionTreeRef.value.setCheckedKeys(checkedMenuIds);
+    }
+  } catch (e) {
+    console.error("获取权限数据失败:", e);
+    ElMessage.error("获取权限数据失败");
+    permissionDialogVisible.value = false;
+  }
+}
+
+/**
+ * 递归处理菜单树数据，添加label字段
+ * @param {Array} menuList 菜单列表
+ * @returns 处理后的菜单列表
+ */
+function processMenuTree(menuList) {
+  if (!Array.isArray(menuList)) return [];
+
+  return menuList.map(menu => {
+    const processedMenu = {
+      ...menu,
+      label: menu.meta?.title || menu.title || menu.name || menu.id,
+    };
+
+    if (menu.children && Array.isArray(menu.children)) {
+      processedMenu.children = processMenuTree(menu.children);
+    }
+
+    return processedMenu;
+  });
+}
+
+async function submitPermission() {
+  if (!currentRoleId.value) {
+    ElMessage.warning("请先选择角色");
+    return;
+  }
+
+  try {
+    permissionSubmitting.value = true;
+
+    // 获取所有选中的菜单ID（严格模式下，getCheckedKeys返回所有选中的节点）
+    const checkedKeys = permissionTreeRef.value.getCheckedKeys();
+
+    console.log('提交的权限ID列表:', checkedKeys);
+
+    await setRolePermissions(currentRoleId.value, checkedKeys);
+    ElMessage.success("权限设置成功");
+    permissionDialogVisible.value = false;
+  } catch (e) {
+    console.error("设置权限失败:", e);
+    ElMessage.error((e && e.message) || "设置权限失败");
+  } finally {
+    permissionSubmitting.value = false;
+  }
+}
+
 onMounted(() => {
   fetchList();
 });
@@ -251,6 +380,16 @@ onMounted(() => {
   .pagination-container {
     margin-top: 20px;
     text-align: right;
+  }
+
+  .permission-tree-wrapper {
+    padding: 10px 0;
+  }
+
+  .custom-tree-node {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
   }
 }
 </style>

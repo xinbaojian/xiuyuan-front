@@ -84,7 +84,8 @@ instance.interceptors.request.use(
     }
 
     //这里会过滤所有为空、0、false的key，如果不需要请自行注释
-    if (config.data) config.data = pickBy(config.data, identity);
+    // 注意：如果是数组类型，不要使用pickBy处理
+    if (config.data && !Array.isArray(config.data)) config.data = pickBy(config.data, identity);
     if (
       config.data &&
       config.headers["Content-Type"] ===

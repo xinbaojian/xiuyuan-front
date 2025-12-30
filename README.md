@@ -124,7 +124,7 @@ git clone -b master https://github.com/zxwk1998/vue-admin-better.git
 pnpm i --registry=http://mirrors.cloud.tencent.com/npm/
 
 # 本地开发 启动项目
-npm run serve:rspack
+pnpm run serve:rspack
 ```
 
 ## 🌱 Vue 3.x (Element Plus) [点击切换仓库](https://github.com/zxwk1998/vue3-admin-better)
