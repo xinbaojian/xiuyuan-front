@@ -57,9 +57,9 @@
         <el-table-column type="selection" width="55" />
         <el-table-column prop="loginName" label="登录账号" min-width="120" />
         <el-table-column prop="username" label="用户名" min-width="120" />
-        <el-table-column prop="dept.deptName" label="部门" min-width="150" />
-        <el-table-column prop="post.postName" label="岗位" min-width="150" />
-        <el-table-column prop="roleNames" label="角色" min-width="150">
+        <el-table-column prop="dept.deptName" label="部门" min-width="120" />
+        <el-table-column prop="post.postName" label="岗位" min-width="120" />
+        <el-table-column prop="roleNames" label="角色" min-width="250">
           <template #default="scope">
             <el-tag
               v-for="role in scope.row.roles"
@@ -70,9 +70,9 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="mobile" label="手机" min-width="150" />
+        <el-table-column prop="mobile" label="手机" min-width="120" />
         <el-table-column prop="email" label="邮箱" min-width="200" />
-        <el-table-column label="性别" min-width="80">
+        <el-table-column label="性别" min-width="60">
           <template #default="scope">
             {{ scope.row.userSex === 'MALE' ? '男' : scope.row.userSex === 'FEMALE' ? '女' : '未知' }}
           </template>
