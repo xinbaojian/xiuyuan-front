@@ -104,7 +104,7 @@ const handleCommand = (command) => {
 };
 
 const personalCenter = () => {
-  router.push("/personalCenter/personalCenter");
+  router.push("/personalCenter");
 };
 
 const settings = () => {

@@ -46,7 +46,7 @@
           <template #default="scope">
             <span style="display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;">
               <el-icon v-if="scope.row.meta && scope.row.meta.icon">
-                <component :is="faToElIcon(scope.row.meta.icon)" />
+                <component :is="getIconComponent(scope.row.meta.icon)" />
               </el-icon>
               <span>{{ scope.row.meta?.title || '' }}</span>
             </span>
@@ -68,6 +68,13 @@
           <template #default="scope">
             <el-tag :type="scope.row.status === 'NORMAL' ? 'success' : 'info'">
               {{ scope.row.status === "NORMAL" ? "正常" : "禁用" }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="hidden" label="显示状态" min-width="100">
+          <template #default="scope">
+            <el-tag :type="scope.row.hidden ? 'info' : 'success'" size="small">
+              {{ scope.row.hidden ? "隐藏" : "显示" }}
             </el-tag>
           </template>
         </el-table-column>
@@ -119,7 +126,6 @@
                 placeholder="选择上级菜单"
                 check-strictly
                 filterable
-                :disabled="isEdit"
                 style="width: 100%"
               />
             </el-form-item>
@@ -191,8 +197,16 @@
             <el-form-item label="图标" prop="icon">
               <el-input
                 v-model="menuForm.icon"
-                placeholder="请输入图标名称"
-              />
+                placeholder="请选择图标"
+                readonly
+                @click="showIconSelector"
+              >
+                <template #prefix>
+                  <el-icon v-if="menuForm.icon">
+                    <component :is="menuForm.icon" />
+                  </el-icon>
+                </template>
+              </el-input>
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -216,6 +230,12 @@
             </el-form-item>
           </el-col>
           <el-col :span="24">
+            <el-form-item label="是否隐藏">
+              <el-switch v-model="menuForm.hidden" />
+              <span class="form-item-tip">（隐藏后路由仍存在，但不在菜单中显示）</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
             <el-form-item label="是否总是显示">
               <el-switch v-model="menuForm.alwaysShow" />
               <span class="form-item-tip">（选择后将始终显示在侧边栏，即使只有一个子菜单）</span>
@@ -235,6 +255,57 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 图标选择对话框 -->
+    <el-dialog
+      title="选择图标"
+      v-model="iconDialogVisible"
+      width="800px"
+      :close-on-click-modal="false"
+    >
+      <el-input
+        v-model="iconSearchText"
+        placeholder="搜索图标..."
+        clearable
+        style="margin-bottom: 20px"
+      >
+        <template #prefix>
+          <el-icon>
+            <Search />
+          </el-icon>
+        </template>
+      </el-input>
+      <el-scrollbar max-height="400px">
+        <el-row :gutter="10">
+          <el-col
+            v-for="icon in filteredIcons"
+            :key="icon"
+            :span="4"
+            style="margin-bottom: 10px"
+          >
+            <el-card
+              class="icon-card"
+              :class="{ 'is-selected': menuForm.icon === icon }"
+              shadow="hover"
+              @click="selectIcon(icon)"
+            >
+              <div class="icon-item">
+                <el-icon class="icon-display">
+                  <component :is="icon" />
+                </el-icon>
+                <div class="icon-name">{{ icon }}</div>
+              </div>
+            </el-card>
+          </el-col>
+        </el-row>
+      </el-scrollbar>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="iconDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="confirmIconSelection">确定</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -245,10 +316,11 @@ import {
   updateMenu,
   deleteMenu,
 } from "@/api/menu.js";
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted, computed } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Search } from "@element-plus/icons-vue";
 import { faToElIcon } from "@/utils/vab";
+import * as ElIcons from "@element-plus/icons-vue";
 
 defineOptions({
   name: "Menu",
@@ -261,6 +333,11 @@ const menuOptions = ref([]);
 const dialogVisible = ref(false);
 const dialogTitle = ref("");
 const isEdit = ref(false);
+
+// 图标选择器相关
+const iconDialogVisible = ref(false);
+const iconSearchText = ref("");
+const iconList = ref(Object.keys(ElIcons));
 
 // 表单引用
 const menuFormRef = ref(null);
@@ -281,6 +358,7 @@ const menuForm = reactive({
   component: "",
   redirect: "",
   alwaysShow: false,
+  hidden: false,
   orderNum: 0,
   status: "NORMAL",
   title: "",
@@ -294,6 +372,26 @@ const rules = {
   path: [{ required: true, message: "路由路径不能为空", trigger: "blur" }],
   name: [{ required: true, message: "路由名称不能为空", trigger: "blur" }],
   title: [{ required: true, message: "菜单标题不能为空", trigger: "blur" }],
+};
+
+// 图标过滤
+const filteredIcons = computed(() => {
+  if (!iconSearchText.value) {
+    return iconList.value;
+  }
+  return iconList.value.filter((icon) =>
+    icon.toLowerCase().includes(iconSearchText.value.toLowerCase())
+  );
+});
+
+// 获取图标组件（智能判断是否需要转换）
+const getIconComponent = (icon) => {
+  // 如果图标名在 Element Plus 图标列表中，直接使用
+  if (iconList.value.includes(icon)) {
+    return icon;
+  }
+  // 否则使用 faToElIcon 进行转换（兼容旧的 FontAwesome 图标名）
+  return faToElIcon(icon);
 };
 
 // 页面初始化
@@ -367,6 +465,7 @@ const handleUpdate = (row) => {
   menuForm.component = typeof row.component === 'object' ? '' : (row.component || "");
   menuForm.redirect = row.redirect || "";
   menuForm.alwaysShow = row.alwaysShow || false;
+  menuForm.hidden = row.hidden || false;
   menuForm.orderNum = row.orderNum || 0;
   menuForm.status = row.status || "NORMAL";
   menuForm.title = row.meta?.title || "";
@@ -388,6 +487,7 @@ const submitForm = () => {
         component: menuForm.component,
         redirect: menuForm.redirect,
         alwaysShow: menuForm.alwaysShow,
+        hidden: menuForm.hidden,
         orderNum: menuForm.orderNum,
         status: menuForm.status,
         title: menuForm.title,
@@ -443,6 +543,7 @@ const resetForm = () => {
     component: "",
     redirect: "",
     alwaysShow: false,
+    hidden: false,
     orderNum: 0,
     status: "NORMAL",
     title: "",
@@ -481,6 +582,22 @@ const handleDelete = (row) => {
       }
     });
 };
+
+// 显示图标选择器
+const showIconSelector = () => {
+  iconSearchText.value = "";
+  iconDialogVisible.value = true;
+};
+
+// 选择图标
+const selectIcon = (icon) => {
+  menuForm.icon = icon;
+};
+
+// 确认图标选择
+const confirmIconSelection = () => {
+  iconDialogVisible.value = false;
+};
 </script>
 
 <style lang="scss" scoped>
@@ -503,6 +620,40 @@ const handleDelete = (row) => {
     margin-left: 10px;
     font-size: 12px;
     color: #999;
+  }
+
+  .icon-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    &.is-selected {
+      border-color: var(--el-color-primary);
+      background-color: var(--el-color-primary-light-9);
+    }
+
+    .icon-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px 0;
+
+      .icon-display {
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+
+      .icon-name {
+        font-size: 12px;
+        text-align: center;
+        word-break: break-all;
+      }
+    }
   }
 }
 </style>

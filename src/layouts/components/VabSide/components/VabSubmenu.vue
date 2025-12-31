@@ -18,6 +18,7 @@
 import { isExternal } from "@/utils/validate";
 import path from "path";
 import { faToElIcon } from "@/utils/vab";
+import * as ElIcons from "@element-plus/icons-vue";
 
 defineOptions({
   name: "VabSubmenu",
@@ -50,7 +51,15 @@ const handlePath = (routePath) => {
 
 // 将路由中的icon名称转换为Element Plus图标组件
 const getIconComponent = (iconName) => {
-  // 直接使用导入的faToElIcon函数
+  // 获取所有Element Plus图标名称
+  const elIconNames = Object.keys(ElIcons);
+
+  // 如果是Element Plus原生图标，直接返回
+  if (elIconNames.includes(iconName)) {
+    return iconName;
+  }
+
+  // 否则使用faToElIcon进行转换（兼容旧的FontAwesome图标名）
   return faToElIcon(iconName);
 };
 </script>
