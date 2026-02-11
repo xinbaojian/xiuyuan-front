@@ -27,7 +27,7 @@
               <el-option label="禁用" value="DISABLE"></el-option>
             </el-select>
             <el-button type="primary" @click="fetchList">查询</el-button>
-            <el-button type="primary" @click="openCreate">添加岗位</el-button>
+            <el-button v-permissions="['setting:post:add']" type="primary" @click="openCreate">添加岗位</el-button>
           </div>
         </div>
       </template>
@@ -47,8 +47,8 @@
         <el-table-column prop="remark" label="备注" min-width="200" show-overflow-tooltip />
         <el-table-column fixed="right" label="操作" min-width="180" align="center">
           <template #default="{ row }">
-            <el-button type="text" @click="openEdit(row)">编辑</el-button>
-            <el-button type="text" @click="handleDelete(row)" style="color: #f56c6c;">删除</el-button>
+            <el-button v-permissions="['setting:post:edit']" type="text" @click="openEdit(row)">编辑</el-button>
+            <el-button v-permissions="['setting:post:delete']" type="text" @click="handleDelete(row)" style="color: #f56c6c;">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

@@ -11,17 +11,14 @@ export function convertRouter(asyncRoutes) {
     return []
   }
 
-  console.log('convertRouter 开始处理，原始数据:', JSON.stringify(asyncRoutes, null, 2))
 
   return asyncRoutes
     .map((route, index) => {
       if (!route) return null
 
-      console.log(`处理路由 ${index}:`, route.path, route.name, route.meta?.title)
 
       // 过滤掉禁用的菜单
       if (route.status === 'DISABLE') {
-        console.log('路由已禁用，跳过:', route.path)
         return null
       }
 
@@ -35,10 +32,8 @@ export function convertRouter(asyncRoutes) {
             // 如果子路由是绝对路径（以 / 开头），直接使用；否则拼接
             const redirectPath = firstChild.path.startsWith('/') ? firstChild.path : `${route.path}${firstChild.path}`
             route.redirect = redirectPath
-            console.log('根路由设置 redirect:', redirectPath)
           }
         } else {
-          console.log('删除无效 redirect:', route.redirect, 'for route:', route.path)
           delete route.redirect
         }
       }
@@ -48,7 +43,6 @@ export function convertRouter(asyncRoutes) {
         if (typeof route.component === 'string') {
           if (route.component === 'Layout') {
             route.component = () => import('@/layouts')
-            console.log('Layout 组件转换:', route.path)
           } else if (route.component === 'EmptyLayout') {
             route.component = () => import('@/layouts/EmptyLayout')
           } else {
@@ -66,7 +60,6 @@ export function convertRouter(asyncRoutes) {
                 componentPath = `views/${componentPath}`
               }
 
-              console.log('组件路径转换:', route.component, '->', `@/${componentPath}`)
 
               route.component = () =>
                 import(`@/${componentPath}`).catch((err) => {
@@ -84,21 +77,17 @@ export function convertRouter(asyncRoutes) {
       // 处理权限字段：将字符串转换为数组
       if (route.meta && route.meta.permissions) {
         if (typeof route.meta.permissions === 'string') {
-          console.log('权限转换:', route.meta.permissions, '-> [', route.meta.permissions, ']')
           route.meta.permissions = [route.meta.permissions]
         }
       }
 
       if (route.children) {
-        console.log('处理子路由，数量:', route.children.length, 'for route:', route.path)
         if (Array.isArray(route.children) && route.children.length) {
           route.children = convertRouter(route.children)
           // 过滤掉空路由
           route.children = route.children.filter((child) => child !== null)
-          console.log('子路由处理后剩余数量:', route.children.length, 'for route:', route.path)
         }
         if (!route.children || route.children.length === 0) {
-          console.log('删除空的子路由 for route:', route.path)
           delete route.children
         }
       }

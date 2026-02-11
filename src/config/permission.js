@@ -31,7 +31,6 @@ router.beforeEach(async (to, from, next) => {
 
   // 处理无效路径 /noRedirect
   if (to.path === '/noRedirect' || to.path === 'noRedirect') {
-    console.log('检测到无效路径 /noRedirect，重定向到首页')
     next({ path: '/', replace: true })
     if (progressBar) VabProgress.done()
     return
@@ -71,9 +70,6 @@ router.beforeEach(async (to, from, next) => {
             accessRoutes = await store.dispatch("routes/setAllRoutes");
           }
 
-          console.log('准备添加路由，accessRoutes:', accessRoutes)
-          console.log('accessRoutes 类型:', typeof accessRoutes)
-          console.log('accessRoutes 是否为数组:', Array.isArray(accessRoutes))
 
           // 确保accessRoutes是数组
           if (!Array.isArray(accessRoutes)) {
@@ -81,15 +77,12 @@ router.beforeEach(async (to, from, next) => {
             accessRoutes = [];
           }
 
-          console.log('开始添加路由，路由数量:', accessRoutes.length)
 
           // 添加路由
           accessRoutes.forEach((item) => {
-            console.log('添加路由:', item.path || item.name)
             router.addRoute(item);
           });
 
-          console.log('路由添加完成，当前路由列表:', router.getRoutes())
 
           // 确保路由添加完成后，跳转到目标页面
           next({ ...to, replace: true });

@@ -105,7 +105,6 @@ onBeforeMount(() => {
     try {
       const routeInfo = JSON.parse(savedRoute);
       // 这里可以添加恢复路由状态的逻辑，比如重新设置Vuex中的路由状态
-      console.log('恢复保存的路由信息:', routeInfo);
       // 清除保存的路由信息
       sessionStorage.removeItem('currentRoute');
     } catch (e) {

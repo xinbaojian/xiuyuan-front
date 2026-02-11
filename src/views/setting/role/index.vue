@@ -19,7 +19,7 @@
               <el-option label="禁用" value="DISABLE"></el-option>
             </el-select>
             <el-button type="primary" @click="fetchList">查询</el-button>
-            <el-button type="primary" @click="openCreate">添加角色</el-button>
+            <el-button v-permissions="['setting:role:add']" type="primary" @click="openCreate">添加角色</el-button>
           </div>
         </div>
       </template>
@@ -39,9 +39,9 @@
         <el-table-column prop="remark" label="备注" />
         <el-table-column fixed="right" label="操作" min-width="220">
           <template #default="{ row }">
-            <el-button type="text" @click="openEdit(row)">编辑</el-button>
-            <el-button type="text" @click="openPermission(row)">设置权限</el-button>
-            <el-button type="text" @click="handleDelete(row)">删除</el-button>
+            <el-button v-permissions="['setting:role:update']" type="text" @click="openEdit(row)">编辑</el-button>
+            <el-button v-permissions="['setting:role:permission:set']" type="text" @click="openPermission(row)">设置权限</el-button>
+            <el-button v-permissions="['setting:role:delete']" type="text" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -116,7 +116,7 @@
 <script setup>
 import { ref, reactive, onMounted, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { getList, doCreate, doEdit, doDelete, getDetail, getRolePermissions, setRolePermissions } from "@/api/role";
+import { getList, doCreate, doEdit, doDelete, getRolePermissions, setRolePermissions } from "@/api/role";
 import { getMenuTree } from "@/api/menu";
 
 const list = ref([]);

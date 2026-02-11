@@ -29,7 +29,7 @@
               <el-option label="禁用" value="DISABLE"></el-option>
             </el-select>
             <el-button type="primary" @click="handleQuery">查询</el-button>
-            <el-button type="primary" @click="handleAdd()">添加菜单</el-button>
+            <el-button v-permissions="['setting:menu:add']" type="primary" @click="handleAdd()">添加菜单</el-button>
           </div>
         </div>
       </template>
@@ -80,16 +80,18 @@
         </el-table-column>
         <el-table-column fixed="right" label="操作" min-width="180">
           <template #default="scope">
-            <el-button type="primary" link @click="handleUpdate(scope.row)"
+            <el-button v-permissions="['setting:menu:edit']" type="primary" link @click="handleUpdate(scope.row)"
               >编辑</el-button
             >
             <el-button
+            v-permissions="['setting:menu:add']"
               type="primary"
               link
               @click="handleAdd(scope.row)"
               >新增下级</el-button
             >
             <el-button
+            v-permissions="['setting:menu:delete']"
               type="danger"
               link
               @click="handleDelete(scope.row)"
@@ -439,8 +441,6 @@ const getMenus = () => {
           children: builtOptions
         }
       ];
-      
-      console.log('菜单选项构建完成:', menuOptions.value);
     })
     .finally(() => {
       loading.value = false;

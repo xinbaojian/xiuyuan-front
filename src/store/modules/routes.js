@@ -44,12 +44,10 @@ const actions = {
    */
   async setAllRoutes({ commit }) {
     try {
-      console.log('开始获取用户菜单...')
 
       // 使用获取当前用户菜单的接口
       let response = await getCurrentMenuTree()
 
-      console.log('菜单接口返回:', response)
 
       let { data } = response
 
@@ -58,13 +56,9 @@ const actions = {
         data = []
       }
 
-      console.log('原始菜单数据:', data)
-      console.log('菜单数量:', data.length)
 
       const accessedRoutes = convertRouter(data)
 
-      console.log('转换后的路由:', accessedRoutes)
-      console.log('路由数量:', accessedRoutes.length)
 
       commit('setAllRoutes', accessedRoutes)
       return accessedRoutes
@@ -78,7 +72,6 @@ const actions = {
         console.warn('开发模式下菜单接口调用失败，回退到硬编码路由')
         // 使用硬编码路由作为降级方案
         const accessedRoutes = filterAsyncRoutes(asyncRoutes, ['admin'])
-        console.log('使用硬编码路由，数量:', accessedRoutes.length)
         commit('setAllRoutes', accessedRoutes)
         return accessedRoutes
       }

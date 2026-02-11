@@ -29,7 +29,7 @@
               <el-option label="禁用" value="DISABLE"></el-option>
             </el-select>
             <el-button type="primary" @click="handleQuery">查询</el-button>
-            <el-button type="primary" @click="handleAdd()">添加部门</el-button>
+            <el-button v-permissions="['sys:dept:add']" type="primary" @click="handleAdd()">添加部门</el-button>
           </div>
         </div>
       </template>
@@ -57,10 +57,11 @@
         <el-table-column prop="createTime" label="创建时间" min-width="160" />
         <el-table-column fixed="right" label="操作" min-width="180">
           <template #default="scope">
-            <el-button type="primary" link @click="handleUpdate(scope.row)"
+            <el-button v-permissions="['sys:dept:edit']" type="primary" link @click="handleUpdate(scope.row)"
               >编辑</el-button
             >
             <el-button
+            v-permissions="['sys:dept:remove']"
               type="primary"
               link
               @click="handleDelete(scope.row)"
