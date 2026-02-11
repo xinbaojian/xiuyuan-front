@@ -83,11 +83,20 @@ instance.interceptors.request.use(
       config.headers[tokenName] = 'Bearer ' + store.state.user.accessToken;
     }
 
+    // 如果是 FormData，删除默认的 Content-Type，让浏览器自动设置
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+
     //这里会过滤所有为空、0、false的key，如果不需要请自行注释
     // 注意：如果是数组类型，不要使用pickBy处理
-    if (config.data && !Array.isArray(config.data)) config.data = pickBy(config.data, identity);
+    if (config.data && !Array.isArray(config.data) && !(config.data instanceof FormData)) {
+      config.data = pickBy(config.data, identity);
+    }
     if (
       config.data &&
+      !Array.isArray(config.data) &&
+      !(config.data instanceof FormData) &&
       config.headers["Content-Type"] ===
         "application/x-www-form-urlencoded;charset=UTF-8"
     )

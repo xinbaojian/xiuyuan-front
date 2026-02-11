@@ -102,3 +102,28 @@ export function deleteUser(id) {
     method: "delete",
   });
 }
+
+/**
+ * 获取当前用户信息
+ * @returns 当前用户信息
+ */
+export function getCurrentUserInfo() {
+  return request({
+    url: "/admin/user/current",
+    method: "get",
+  });
+}
+
+/**
+ * 修改用户资料
+ * @param id 用户ID
+ * @param data 用户资料数据
+ * @returns 结果
+ */
+export function updateUserProfile(id, data) {
+  return request({
+    url: `/admin/user/avatar/${id}`,
+    method: "put",
+    data,
+  });
+}

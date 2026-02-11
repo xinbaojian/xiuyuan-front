@@ -55,10 +55,16 @@
       </el-dropdown-menu>
     </template>
   </el-dropdown>
+
+  <!-- 个人中心对话框 -->
+  <PersonalCenterDialog
+    v-model:visible="personalCenterVisible"
+    @success="handlePersonalCenterSuccess"
+  />
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useStore } from "vuex";
 import { useRouter, useRoute } from "vue-router";
 import { ElMessage } from "element-plus";
@@ -70,6 +76,7 @@ import {
   Link,
   SwitchButton,
 } from "@element-plus/icons-vue";
+import PersonalCenterDialog from "@/components/PersonalCenterDialog/index.vue";
 
 defineOptions({
   name: "VabAvatar",
@@ -78,6 +85,9 @@ defineOptions({
 const store = useStore();
 const router = useRouter();
 const route = useRoute();
+
+// 个人中心对话框显示状态
+const personalCenterVisible = ref(false);
 
 // 计算属性
 const avatar = computed(() => store.getters["user/avatar"]);
@@ -104,7 +114,7 @@ const handleCommand = (command) => {
 };
 
 const personalCenter = () => {
-  router.push("/personalCenter");
+  personalCenterVisible.value = true;
 };
 
 const settings = () => {
@@ -117,6 +127,12 @@ const logout = () => {
     const fullPath = route.fullPath;
     router.push(`/login?redirect=${fullPath}`);
   }
+};
+
+// 个人中心保存成功回调
+const handlePersonalCenterSuccess = () => {
+  // 重新获取用户信息以更新头像和用户名
+  store.dispatch("user/getUserInfo");
 };
 </script>
 
