@@ -107,6 +107,18 @@ instance.interceptors.response.use(
   (response) => {
     if (loadingInstance) loadingInstance.close();
 
+    const data = response.data;
+
+    // 检查响应体中的 code 字段
+    if (data && typeof data === 'object' && 'code' in data) {
+      // 如果 code 不等于 200，表示业务错误
+      if (data.code !== 200) {
+        const errorMsg = data.message || data.msg || '操作失败';
+        ElMessage.error(errorMsg);
+        return Promise.reject(new Error(errorMsg));
+      }
+    }
+
     // 只要HTTP状态码是2xx就认为是成功
     return response.data;
   },

@@ -2,7 +2,7 @@ import request from "@/utils/request";
 
 export function getList(params) {
   return request({
-    url: "/role/page",
+    url: "/admin/role/page",
     method: "get",
     params,
   });
@@ -10,7 +10,7 @@ export function getList(params) {
 
 export function doEdit(data) {
   return request({
-    url: "/role/" + data.id,
+    url: "/admin/role/" + data.id,
     method: "post",
     data,
   });
@@ -18,7 +18,7 @@ export function doEdit(data) {
 
 export function doDelete(data) {
   return request({
-    url: "/role/" + data.id,
+    url: "/admin/role/" + data.id,
     method: "delete",
     data,
   });
@@ -26,7 +26,7 @@ export function doDelete(data) {
 
 export function doCreate(data) {
   return request({
-    url: "/role",
+    url: "/admin/role",
     method: "post",
     data,
   });
@@ -34,7 +34,7 @@ export function doCreate(data) {
 
 export function getDetail(id) {
   return request({
-    url: "/role/" + id,
+    url: "/admin/role/" + id,
     method: "get",
   });
 }
@@ -45,7 +45,7 @@ export function getDetail(id) {
  */
 export function getRoleOptions() {
   return request({
-    url: "/role/options",
+    url: "/admin/role/options",
     method: "get",
   });
 }
@@ -57,7 +57,7 @@ export function getRoleOptions() {
  */
 export function getRolePermissions(roleId) {
   return request({
-    url: `/role/${roleId}/permission`,
+    url: `/admin/role/${roleId}/permission`,
     method: "get",
   });
 }
@@ -70,7 +70,7 @@ export function getRolePermissions(roleId) {
  */
 export function setRolePermissions(roleId, menuIds) {
   return request({
-    url: `/role/${roleId}/permission`,
+    url: `/admin/role/${roleId}/permission`,
     method: "put",
     data: menuIds,
   });

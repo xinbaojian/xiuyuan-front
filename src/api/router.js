@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getRouterList(data) {
   return request({
-    url: '/menu/navigate',
+    url: '/admin/menu/navigate',
     method: 'post',
     data,
   })
@@ -14,7 +14,7 @@ export function getRouterList(data) {
  */
 export function getMenuTree() {
   return request({
-    url: '/menu/tree',
+    url: '/admin/menu/tree',
     method: 'get',
   })
 }
@@ -26,7 +26,7 @@ export function getMenuTree() {
  */
 export function getCurrentMenuTree() {
   return request({
-    url: '/menu/current/menu/tree',
+    url: '/admin/menu/current/menu/tree',
     method: 'get',
   })
 }

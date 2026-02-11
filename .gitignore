@@ -26,3 +26,7 @@ public/video
 /.history
 /.claude
 .mcp.json
+.codeartsdoer
+.arts/
+.lingma/
+.vscode/

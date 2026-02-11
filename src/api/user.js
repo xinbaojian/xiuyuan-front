@@ -3,7 +3,7 @@ import { tokenName } from "@/config";
 
 export async function login(data) {
   return request({
-    url: "/login",
+    url: "/admin/login",
     method: "post",
     data,
   });
@@ -11,7 +11,7 @@ export async function login(data) {
 
 export function getUserInfo(accessToken) {
   return request({
-    url: "/user/userInfo",
+    url: "/admin/user/userInfo",
     method: "get",
     data: {
       [tokenName]: accessToken,
@@ -21,14 +21,14 @@ export function getUserInfo(accessToken) {
 
 export function logout() {
   return request({
-    url: "/logout",
+    url: "/admin/logout",
     method: "post",
   });
 }
 
 export function register() {
   return request({
-    url: "/register",
+    url: "/admin/register",
     method: "post",
   });
 }
@@ -40,7 +40,7 @@ export function register() {
  */
 export function getUserList(params) {
   return request({
-    url: "/user/page",
+    url: "/admin/user/page",
     method: "get",
     params,
   });
@@ -53,7 +53,7 @@ export function getUserList(params) {
  */
 export function addUser(data) {
   return request({
-    url: "/user",
+    url: "/admin/user",
     method: "post",
     data,
   });
@@ -67,7 +67,7 @@ export function addUser(data) {
  */
 export function updateUser(id, data) {
   return request({
-    url: `/user/${id}`,
+    url: `/admin/user/${id}`,
     method: "post",
     data,
   });
@@ -85,7 +85,7 @@ export function resetUserPassword(id, newPassword) {
     data.newPassword = newPassword;
   }
   return request({
-    url: `/user/resetPwd/${id}`,
+    url: `/admin/user/resetPwd/${id}`,
     method: 'post',
     data,
   });
@@ -98,7 +98,7 @@ export function resetUserPassword(id, newPassword) {
  */
 export function deleteUser(id) {
   return request({
-    url: `/user/${id}`,
+    url: `/admin/user/${id}`,
     method: "delete",
   });
 }

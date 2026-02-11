@@ -7,7 +7,7 @@ import request from "@/utils/request";
  */
 export function getDeptTree(queryParams) {
   return request({
-    url: "/dept/tree",
+    url: "/admin/dept/tree",
     method: "get",
     params: queryParams,
   });
@@ -20,7 +20,7 @@ export function getDeptTree(queryParams) {
  */
 export function addDept(data) {
   return request({
-    url: "/dept",
+    url: "/admin/dept",
     method: "post",
     data: data,
   });
@@ -34,7 +34,7 @@ export function addDept(data) {
  */
 export function updateDept(id, data) {
   return request({
-    url: `/dept/${id}`,
+    url: `/admin/dept/${id}`,
     method: "post",
     data: data,
   });
@@ -47,7 +47,7 @@ export function updateDept(id, data) {
  */
 export function deleteDept(id) {
   return request({
-    url: `/dept/${id}`,
+    url: `/admin/dept/${id}`,
     method: "delete",
   });
 }
@@ -58,7 +58,7 @@ export function deleteDept(id) {
  */
 export function getDeptOptions() {
   return request({
-    url: "/dept/tree",
+    url: "/admin/dept/tree",
     method: "get",
     params: { status: "NORMAL" }
   });

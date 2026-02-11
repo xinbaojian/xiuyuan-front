@@ -7,7 +7,7 @@ import request from "@/utils/request";
  */
 export function getMenuTree(params) {
   return request({
-    url: "/menu/tree",
+    url: "/admin/menu/tree",
     method: "get",
     params,
   });
@@ -20,7 +20,7 @@ export function getMenuTree(params) {
  */
 export function addMenu(data) {
   return request({
-    url: "/menu",
+    url: "/admin/menu",
     method: "post",
     data: data,
   });
@@ -34,7 +34,7 @@ export function addMenu(data) {
  */
 export function updateMenu(id, data) {
   return request({
-    url: `/menu/${id}`,
+    url: `/admin/menu/${id}`,
     method: "post",
     data: data,
   });
@@ -47,7 +47,7 @@ export function updateMenu(id, data) {
  */
 export function deleteMenu(id) {
   return request({
-    url: `/menu/${id}`,
+    url: `/admin/menu/${id}`,
     method: "delete",
   });
 }

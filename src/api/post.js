@@ -2,7 +2,7 @@ import request from "@/utils/request";
 
 export function getList(params) {
   return request({
-    url: "/post/page",
+    url: "/admin/post/page",
     method: "get",
     params,
   });
@@ -10,7 +10,7 @@ export function getList(params) {
 
 export function doCreate(data) {
   return request({
-    url: "/post",
+    url: "/admin/post",
     method: "post",
     data,
   });
@@ -18,7 +18,7 @@ export function doCreate(data) {
 
 export function doEdit(data) {
   return request({
-    url: `/post/${data.id}`,
+    url: `/admin/post/${data.id}`,
     method: "post",
     data,
   });
@@ -26,7 +26,7 @@ export function doEdit(data) {
 
 export function doDelete(data) {
   return request({
-    url: `/post/${data.id}`,
+    url: `/admin/post/${data.id}`,
     method: "delete",
   });
 }
@@ -37,7 +37,7 @@ export function doDelete(data) {
  */
 export function getPostOptions() {
   return request({
-    url: "/post/options",
+    url: "/admin/post/options",
     method: "get",
   });
 }

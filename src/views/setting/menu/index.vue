@@ -144,13 +144,14 @@
                 v-model="menuForm.type"
                 placeholder="请选择菜单类型"
                 style="width: 100%"
+                @change="handleTypeChange"
               >
                 <el-option label="菜单" value="MENU" />
                 <el-option label="按钮" value="BUTTON" />
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="12" v-show="menuForm.type === 'MENU'">
             <el-form-item label="路由名称" prop="name">
               <el-input
                 v-model="menuForm.name"
@@ -158,7 +159,7 @@
               />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="12" v-show="menuForm.type === 'MENU'">
             <el-form-item label="路由路径" prop="path">
               <el-input
                 v-model="menuForm.path"
@@ -166,7 +167,7 @@
               />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="12" v-show="menuForm.type === 'MENU'">
             <el-form-item label="组件路径" prop="component">
               <el-input
                 v-model="menuForm.component"
@@ -174,7 +175,7 @@
               />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="12" v-show="menuForm.type === 'MENU'">
             <el-form-item label="重定向" prop="redirect">
               <el-input
                 v-model="menuForm.redirect"
@@ -316,7 +317,7 @@ import {
   updateMenu,
   deleteMenu,
 } from "@/api/menu.js";
-import { ref, reactive, onMounted, computed } from "vue";
+import { ref, reactive, onMounted, computed, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Search } from "@element-plus/icons-vue";
 import { faToElIcon } from "@/utils/vab";
@@ -367,12 +368,23 @@ const menuForm = reactive({
   permissions: "",
 });
 
-// 表单验证规则
-const rules = {
-  path: [{ required: true, message: "路由路径不能为空", trigger: "blur" }],
-  name: [{ required: true, message: "路由名称不能为空", trigger: "blur" }],
+// 基础表单验证规则
+const baseRules = {
   title: [{ required: true, message: "菜单标题不能为空", trigger: "blur" }],
 };
+
+// 动态表单验证规则
+const rules = computed(() => {
+  const dynamicRules = { ...baseRules };
+  
+  // 只有菜单类型才需要验证路由名称和路径
+  if (menuForm.type === "MENU") {
+    dynamicRules.path = [{ required: true, message: "路由路径不能为空", trigger: "blur" }];
+    dynamicRules.name = [{ required: true, message: "路由名称不能为空", trigger: "blur" }];
+  }
+  
+  return dynamicRules;
+});
 
 // 图标过滤
 const filteredIcons = computed(() => {
@@ -410,7 +422,7 @@ const getMenus = () => {
       const buildMenuOptions = (menus) => {
         return menus.map(menu => ({
           id: menu.id,
-          title: menu.meta?.title || menu.path,
+          title: menu.meta?.title || menu.name || menu.path,
           path: menu.path,
           children: menu.children && menu.children.length > 0
             ? buildMenuOptions(menu.children)
@@ -419,13 +431,16 @@ const getMenus = () => {
       };
 
       // 添加根节点
+      const builtOptions = buildMenuOptions(menuList.value);
       menuOptions.value = [
         {
           id: "00",
           title: "主类目",
-          children: buildMenuOptions(menuList.value)
+          children: builtOptions
         }
       ];
+      
+      console.log('菜单选项构建完成:', menuOptions.value);
     })
     .finally(() => {
       loading.value = false;
@@ -442,12 +457,28 @@ const handleAdd = (row) => {
   dialogTitle.value = "添加菜单";
   isEdit.value = false;
   dialogVisible.value = true;
+  
+  // 重置表单
+  resetForm();
+  
   // 设置父级ID
   if (row) {
     menuForm.parentId = row.id || "00";
+    console.log('设置父级菜单ID:', row.id, '菜单标题:', row.meta?.title);
   } else {
     menuForm.parentId = "00";
   }
+  
+  // 清除表单验证并在下次DOM更新后重新验证
+  nextTick(() => {
+    if (menuFormRef.value) {
+      menuFormRef.value.clearValidate();
+      // 强制重新验证以确保显示正确的父级选择
+      setTimeout(() => {
+        menuFormRef.value.validateField('parentId');
+      }, 100);
+    }
+  });
 };
 
 // 修改菜单
@@ -472,6 +503,15 @@ const handleUpdate = (row) => {
   menuForm.icon = row.meta?.icon || "";
   menuForm.defaultOpen = row.meta?.defaultOpen || false;
   menuForm.permissions = row.meta?.permissions || "";
+  
+  console.log('编辑菜单 - 当前parentId:', menuForm.parentId);
+  
+  // 清除表单验证
+  nextTick(() => {
+    if (menuFormRef.value) {
+      menuFormRef.value.clearValidate();
+    }
+  });
 };
 
 // 提交表单
@@ -530,6 +570,24 @@ const submitForm = () => {
 const cancel = () => {
   dialogVisible.value = false;
   resetForm();
+};
+
+// 处理菜单类型变化
+const handleTypeChange = () => {
+  // 当切换为按钮类型时，清空路由相关字段
+  if (menuForm.type === "BUTTON") {
+    menuForm.path = "";
+    menuForm.name = "";
+    menuForm.component = "";
+    menuForm.redirect = "";
+    menuForm.alwaysShow = false;
+    menuForm.defaultOpen = false;
+  }
+  
+  // 重新验证表单
+  if (menuFormRef.value) {
+    menuFormRef.value.clearValidate();
+  }
 };
 
 // 重置表单
