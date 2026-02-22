@@ -28,15 +28,16 @@
         <el-table-column prop="roleName" label="角色名称" min-width="120" />
         <el-table-column prop="roleKey" label="编码" min-width="120" />
         <el-table-column prop="orderNum" label="排序" min-width="80" />
-        <el-table-column prop="status" label="状态" min-width="120" >
+        <el-table-column prop="status" label="状态" min-width="100" >
           <template #default="{ row }">
             <el-tag :type="row.status === 'NORMAL' ? 'success' : 'info'">
               {{ row.status === 'NORMAL' ? '正常' : '禁用' }}
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="dataScopeDesc" label="数据权限" min-width="120" />
         <el-table-column prop="createTime" label="创建时间" min-width="160" />
-        <el-table-column prop="remark" label="备注" />
+        <el-table-column prop="remark" label="备注" min-width="120" />
         <el-table-column fixed="right" label="操作" min-width="220">
           <template #default="{ row }">
             <el-button v-permissions="['setting:role:update']" type="text" @click="openEdit(row)">编辑</el-button>
@@ -53,6 +54,7 @@
       </div>
     </el-card>
 
+    <!-- 新建/编辑角色对话框 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="520px">
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
         <el-form-item label="角色名称" prop="roleName">
@@ -70,6 +72,27 @@
             <el-option label="禁用" value="DISABLE" />
           </el-select>
         </el-form-item>
+        <el-form-item label="数据权限" prop="dataScope">
+          <el-select v-model="form.dataScope" placeholder="请选择数据权限" style="width: 100%" @change="handleDataScopeChange">
+            <el-option label="全部数据权限" value="ALL" />
+            <el-option label="本部门数据权限" value="DEPT" />
+            <el-option label="本部门及子部门数据权限" value="DEPT_AND_CHILD" />
+            <el-option label="仅本人数据权限" value="SELF" />
+            <el-option label="自定义数据权限" value="CUSTOM" />
+          </el-select>
+        </el-form-item>
+        <el-form-item v-if="form.dataScope === 'CUSTOM'" label="数据权限部门" prop="customDeptIds">
+          <el-tree-select
+            v-model="form.customDeptIds"
+            :data="deptTreeData"
+            multiple
+            :render-after-expand="false"
+            show-checkbox
+            check-strictly
+            placeholder="请选择部门"
+            style="width: 100%"
+          />
+        </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input type="textarea" v-model="form.remark" rows="3" placeholder="请输入备注" />
         </el-form-item>
@@ -80,6 +103,7 @@
       </template>
     </el-dialog>
 
+    <!-- 设置角色权限对话框 -->
     <el-dialog v-model="permissionDialogVisible" title="设置角色权限" width="600px">
       <div class="permission-tree-wrapper">
         <el-tree
@@ -118,6 +142,7 @@ import { ref, reactive, onMounted, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getList, doCreate, doEdit, doDelete, getRolePermissions, setRolePermissions } from "@/api/role";
 import { getMenuTree } from "@/api/menu";
+import { getDeptTree } from "@/api/dept";
 
 const list = ref([]);
 const totalCount = ref(0);
@@ -134,8 +159,13 @@ const form = reactive({
   roleKey: "",
   orderNum: 0,
   status: "NORMAL",
+  dataScope: "SELF",
+  customDeptIds: [],
   remark: ""
 });
+
+// 部门树数据
+const deptTreeData = ref([]);
 
 // 权限设置相关
 const permissionDialogVisible = ref(false);
@@ -152,7 +182,17 @@ const rules = {
   roleName: [{ required: true, message: "请输入角色名称", trigger: "blur" }],
   roleKey: [{ required: true, message: "请输入角色编码", trigger: "blur" }],
   status: [{ required: true, message: "请选择状态", trigger: "change" }],
+  dataScope: [{ required: true, message: "请选择数据权限", trigger: "change" }],
 };
+
+// 数据权限选项
+const dataScopeOptions = [
+  { value: "ALL", label: "全部数据权限" },
+  { value: "DEPT", label: "本部门数据权限" },
+  { value: "DEPT_AND_CHILD", label: "本部门及子部门数据权限" },
+  { value: "SELF", label: "仅本人数据权限" },
+  { value: "CUSTOM", label: "自定义数据权限" },
+];
 
 async function fetchList() {
   listLoading.value = true;
@@ -177,6 +217,42 @@ async function fetchList() {
   }
 }
 
+/**
+ * 获取部门树数据
+ */
+async function fetchDeptTree() {
+  try {
+    const response = await getDeptTree({ status: "NORMAL" });
+    if (response && response.data) {
+      deptTreeData.value = processDeptTree(response.data);
+    }
+  } catch (e) {
+    console.error('fetchDeptTree error:', e);
+  }
+}
+
+/**
+ * 递归处理部门树数据，转换为 el-tree-select 需要的格式
+ * @param {Array} deptList 部门列表
+ * @returns 处理后的部门列表
+ */
+function processDeptTree(deptList) {
+  if (!Array.isArray(deptList)) return [];
+
+  return deptList.map(dept => {
+    const processedDept = {
+      value: dept.id,
+      label: dept.label || dept.deptName || dept.name,
+    };
+
+    if (dept.children && Array.isArray(dept.children) && dept.children.length > 0) {
+      processedDept.children = processDeptTree(dept.children);
+    }
+
+    return processedDept;
+  });
+}
+
 function handleSizeChange(val) {
   listQuery.pageSize = val;
   fetchList();
@@ -187,26 +263,45 @@ function handleCurrentChange(val) {
   fetchList();
 }
 
-function openCreate() {
+/**
+ * 数据权限变更处理
+ */
+function handleDataScopeChange(val) {
+  if (val !== 'CUSTOM') {
+    form.customDeptIds = [];
+  }
+}
+
+async function openCreate() {
   dialogTitle.value = "新建角色";
   form.id = null;
   form.roleName = "";
   form.roleKey = "";
   form.orderNum = 0;
   form.status = "NORMAL";
+  form.dataScope = "SELF";
+  form.customDeptIds = [];
   form.remark = "";
+  
+  // 获取部门树数据
+  await fetchDeptTree();
   dialogVisible.value = true;
 }
 
 async function openEdit(row) {
   dialogTitle.value = "编辑角色";
   
-  // 直接使用表格行数据填充表单
+  // 获取部门树数据
+  await fetchDeptTree();
+  
+  // 使用表格行数据填充表单
   form.id = row.id;
   form.roleName = row.roleName || "";
   form.roleKey = row.roleKey || "";
   form.orderNum = row.orderNum || 0;
   form.status = row.status || "NORMAL";
+  form.dataScope = row.dataScope || "SELF";
+  form.customDeptIds = row.customDeptIds || [];
   form.remark = row.remark || "";
 
   dialogVisible.value = true;
@@ -222,8 +317,14 @@ function submitForm() {
         roleKey: form.roleKey,
         orderNum: form.orderNum,
         status: form.status,
+        dataScope: form.dataScope,
         remark: form.remark,
       };
+
+      // 如果是自定义数据权限，添加自定义部门ID列表
+      if (form.dataScope === 'CUSTOM') {
+        submitData.customDeptIds = form.customDeptIds;
+      }
 
       if (form.id) {
         // 编辑角色
@@ -248,7 +349,7 @@ function handleDelete(row) {
   ElMessageBox.confirm("确定删除该角色吗？", "提示", { type: "warning" })
     .then(async () => {
       try {
-        await doDelete({ id: row.id });
+        await doDelete(row.id);
         ElMessage.success("删除成功");
         fetchList();
       } catch (e) {

@@ -474,4 +474,20 @@ html {
       }
     }
   }
+
+  /* 修复 Element Plus 弹窗内下拉组件 z-index 问题 */
+  /* 确保 el-select、el-tree-select 等下拉面板在对话框遮罩层之上 */
+  .el-popper {
+    z-index: 10000 !important;
+  }
+
+  /* 对话框遮罩层 z-index */
+  .el-overlay {
+    z-index: 9998;
+  }
+
+  /* 对话框 z-index */
+  .el-dialog {
+    z-index: 9999;
+  }
 }

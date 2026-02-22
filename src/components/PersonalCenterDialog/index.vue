@@ -296,8 +296,6 @@ watch(
 
 <style lang="scss">
 .personal-center-dialog {
-  z-index: 9999 !important;
-
   .el-dialog__header {
     padding: 20px 20px 10px;
     border-bottom: 1px solid #ebeef5;
@@ -313,10 +311,6 @@ watch(
     padding: 10px 20px 20px;
     border-top: 1px solid #ebeef5;
   }
-}
-
-.el-overlay.el-modal-dialog {
-  z-index: 9998 !important;
 }
 
 .personal-form {

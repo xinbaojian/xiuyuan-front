@@ -1,5 +1,10 @@
 import request from "@/utils/request";
 
+/**
+ * 分页查询角色列表
+ * @param {Object} params 查询参数
+ * @returns 角色分页列表
+ */
 export function getList(params) {
   return request({
     url: "/admin/role/page",
@@ -8,22 +13,11 @@ export function getList(params) {
   });
 }
 
-export function doEdit(data) {
-  return request({
-    url: "/admin/role/" + data.id,
-    method: "post",
-    data,
-  });
-}
-
-export function doDelete(data) {
-  return request({
-    url: "/admin/role/" + data.id,
-    method: "delete",
-    data,
-  });
-}
-
+/**
+ * 新增角色
+ * @param {Object} data 角色表单数据
+ * @returns 新增结果
+ */
 export function doCreate(data) {
   return request({
     url: "/admin/role",
@@ -32,10 +26,28 @@ export function doCreate(data) {
   });
 }
 
-export function getDetail(id) {
+/**
+ * 修改角色
+ * @param {Object} data 角色表单数据
+ * @returns 修改结果
+ */
+export function doEdit(data) {
+  return request({
+    url: "/admin/role/" + data.id,
+    method: "post",
+    data,
+  });
+}
+
+/**
+ * 删除角色
+ * @param {string} id 角色ID
+ * @returns 删除结果
+ */
+export function doDelete(id) {
   return request({
     url: "/admin/role/" + id,
-    method: "get",
+    method: "delete",
   });
 }
 

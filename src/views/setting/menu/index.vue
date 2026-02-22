@@ -129,7 +129,6 @@
                 placeholder="选择上级菜单"
                 check-strictly
                 filterable
-                popper-class="menu-tree-select-dropdown"
                 style="width: 100%"
               />
             </el-form-item>
@@ -148,7 +147,6 @@
                 v-model="menuForm.type"
                 placeholder="请选择菜单类型"
                 style="width: 100%"
-                popper-class="menu-type-select-dropdown"
                 @change="handleTypeChange"
               >
                 <el-option label="菜单" value="MENU" />
@@ -733,17 +731,5 @@ const confirmIconSelection = () => {
       }
     }
   }
-}
-</style>
-
-<style lang="scss">
-// 修复 el-select 下拉菜单在对话框中的显示问题
-.menu-type-select-dropdown {
-  z-index: 9999 !important;
-}
-
-// 修复 el-tree-select 下拉菜单在对话框中的显示问题
-.menu-tree-select-dropdown {
-  z-index: 10000 !important;
 }
 </style>
