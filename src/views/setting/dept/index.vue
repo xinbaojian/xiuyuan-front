@@ -184,7 +184,7 @@ const queryParams = reactive({
 const deptForm = reactive({
   id: "",
   parentId: "00",
-  name: "",
+  deptName: "",
   orderNum: 0,
   leader: "",
   phone: "",
@@ -197,7 +197,7 @@ const rules = {
   parentId: [
     { required: true, message: "上级部门不能为空", trigger: "blur" },
   ],
-  name: [
+  deptName: [
     { required: true, message: "部门名称不能为空", trigger: "blur" },
   ],
   orderNum: [
@@ -278,8 +278,11 @@ const handleUpdate = (row) => {
   isEdit.value = true;
   dialogVisible.value = true;
 
-  // 深拷贝，避免影响原数据
-  Object.assign(deptForm, row);
+  // 深拷贝，避免影响原数据，并做字段映射
+  Object.assign(deptForm, {
+    ...row,
+    deptName: row.name, // 后端返回的是 name，表单需要 deptName
+  });
 };
 
 // 提交表单
@@ -325,7 +328,7 @@ const resetForm = () => {
   Object.assign(deptForm, {
     id: "",
     parentId: "00",
-    name: "",
+    deptName: "",
     orderNum: 0,
     leader: "",
     phone: "",
