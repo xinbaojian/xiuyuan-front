@@ -106,6 +106,7 @@
     <el-dialog
       :title="dialogTitle"
       v-model="dialogVisible"
+      :draggable="true"
       width="700px"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
@@ -128,6 +129,7 @@
                 placeholder="选择上级菜单"
                 check-strictly
                 filterable
+                popper-class="menu-tree-select-dropdown"
                 style="width: 100%"
               />
             </el-form-item>
@@ -146,6 +148,7 @@
                 v-model="menuForm.type"
                 placeholder="请选择菜单类型"
                 style="width: 100%"
+                popper-class="menu-type-select-dropdown"
                 @change="handleTypeChange"
               >
                 <el-option label="菜单" value="MENU" />
@@ -207,6 +210,16 @@
                 <template #prefix>
                   <el-icon v-if="menuForm.icon">
                     <component :is="menuForm.icon" />
+                  </el-icon>
+                </template>
+                <template #suffix>
+                  <el-icon
+                    v-if="menuForm.icon"
+                    class="el-input__clear"
+                    style="cursor: pointer"
+                    @click.stop="clearIcon"
+                  >
+                    <CircleClose />
                   </el-icon>
                 </template>
               </el-input>
@@ -294,7 +307,7 @@
             >
               <div class="icon-item">
                 <el-icon class="icon-display">
-                  <component :is="icon" />
+                  <component :is="ElIcons[icon]" />
                 </el-icon>
                 <div class="icon-name">{{ icon }}</div>
               </div>
@@ -321,7 +334,7 @@ import {
 } from "@/api/menu.js";
 import { ref, reactive, onMounted, computed, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { Search } from "@element-plus/icons-vue";
+import { Search, CircleClose } from "@element-plus/icons-vue";
 import { faToElIcon } from "@/utils/vab";
 import * as ElIcons from "@element-plus/icons-vue";
 
@@ -340,7 +353,13 @@ const isEdit = ref(false);
 // 图标选择器相关
 const iconDialogVisible = ref(false);
 const iconSearchText = ref("");
-const iconList = ref(Object.keys(ElIcons));
+// 过滤出真正的图标组件(排除非组件的导出项)
+const iconList = ref(
+  Object.keys(ElIcons).filter(key => {
+    // 排除一些非图标的属性和方法
+    return typeof ElIcons[key] === 'object' && ElIcons[key].name && key !== 'default';
+  })
+);
 
 // 表单引用
 const menuFormRef = ref(null);
@@ -378,13 +397,13 @@ const baseRules = {
 // 动态表单验证规则
 const rules = computed(() => {
   const dynamicRules = { ...baseRules };
-  
+
   // 只有菜单类型才需要验证路由名称和路径
   if (menuForm.type === "MENU") {
     dynamicRules.path = [{ required: true, message: "路由路径不能为空", trigger: "blur" }];
     dynamicRules.name = [{ required: true, message: "路由名称不能为空", trigger: "blur" }];
   }
-  
+
   return dynamicRules;
 });
 
@@ -398,13 +417,13 @@ const filteredIcons = computed(() => {
   );
 });
 
-// 获取图标组件（智能判断是否需要转换）
+// 获取图标组件(智能判断是否需要转换)
 const getIconComponent = (icon) => {
   // 如果图标名在 Element Plus 图标列表中，直接使用
   if (iconList.value.includes(icon)) {
     return icon;
   }
-  // 否则使用 faToElIcon 进行转换（兼容旧的 FontAwesome 图标名）
+  // 否则使用 faToElIcon 进行转换(兼容旧的 FontAwesome 图标名)
   return faToElIcon(icon);
 };
 
@@ -457,18 +476,17 @@ const handleAdd = (row) => {
   dialogTitle.value = "添加菜单";
   isEdit.value = false;
   dialogVisible.value = true;
-  
+
   // 重置表单
   resetForm();
-  
+
   // 设置父级ID
   if (row) {
     menuForm.parentId = row.id || "00";
-    console.log('设置父级菜单ID:', row.id, '菜单标题:', row.meta?.title);
   } else {
     menuForm.parentId = "00";
   }
-  
+
   // 清除表单验证并在下次DOM更新后重新验证
   nextTick(() => {
     if (menuFormRef.value) {
@@ -503,9 +521,6 @@ const handleUpdate = (row) => {
   menuForm.icon = row.meta?.icon || "";
   menuForm.defaultOpen = row.meta?.defaultOpen || false;
   menuForm.permissions = row.meta?.permissions || "";
-  
-  console.log('编辑菜单 - 当前parentId:', menuForm.parentId);
-  
   // 清除表单验证
   nextTick(() => {
     if (menuFormRef.value) {
@@ -583,7 +598,7 @@ const handleTypeChange = () => {
     menuForm.alwaysShow = false;
     menuForm.defaultOpen = false;
   }
-  
+
   // 重新验证表单
   if (menuFormRef.value) {
     menuFormRef.value.clearValidate();
@@ -652,6 +667,11 @@ const selectIcon = (icon) => {
   menuForm.icon = icon;
 };
 
+// 清空图标
+const clearIcon = () => {
+  menuForm.icon = "";
+};
+
 // 确认图标选择
 const confirmIconSelection = () => {
   iconDialogVisible.value = false;
@@ -713,5 +733,17 @@ const confirmIconSelection = () => {
       }
     }
   }
+}
+</style>
+
+<style lang="scss">
+// 修复 el-select 下拉菜单在对话框中的显示问题
+.menu-type-select-dropdown {
+  z-index: 9999 !important;
+}
+
+// 修复 el-tree-select 下拉菜单在对话框中的显示问题
+.menu-tree-select-dropdown {
+  z-index: 10000 !important;
 }
 </style>

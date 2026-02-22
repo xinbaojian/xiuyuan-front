@@ -260,9 +260,10 @@ module.exports = {
         warnings: false,
       },
     },
-    open: {
-      target: [`http://localhost:${devPort || 8091}`],
-    },
+    // open: {
+    //   target: [`http://localhost:${devPort || 8091}`],
+    // },
+    open: false,
     setupMiddlewares: (middlewares, devServer) => {
       if (!devServer) {
         throw new Error("dev-server is not defined");
