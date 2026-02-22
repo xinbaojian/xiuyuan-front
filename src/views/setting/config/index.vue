@@ -33,18 +33,19 @@
       </template>
 
       <el-table v-loading="listLoading" :data="list" style="width:100%">
-        <el-table-column prop="configName" label="参数名称" min-width="150" />
-        <el-table-column prop="configKey" label="参数键名" min-width="180" />
-        <el-table-column prop="configValue" label="参数键值" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="configType" label="系统内置" min-width="100" align="center">
+        <el-table-column prop="configName" show-overflow-tooltip label="参数名称" min-width="150" />
+        <el-table-column prop="configKey" show-overflow-tooltip label="参数键名" min-width="180" />
+        <el-table-column prop="configValue" show-overflow-tooltip label="参数键值" min-width="200" />
+        <el-table-column prop="configType" show-overflow-tooltip label="系统内置" min-width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="row.configType === 'Y' ? 'success' : 'info'">
               {{ row.configType === 'Y' ? '是' : '否' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" min-width="160" />
-        <el-table-column prop="updateTime" label="更新时间" min-width="160" />
+        <el-table-column prop="remark" show-overflow-tooltip label="备注" min-width="160" />
+        <el-table-column prop="createTime" show-overflow-tooltip label="创建时间" min-width="160" />
+        <el-table-column prop="updateTime" show-overflow-tooltip label="更新时间" min-width="160" />
         <el-table-column fixed="right" label="操作" min-width="150" align="center">
           <template #default="{ row }">
             <el-button v-permissions="['setting:config:edit']" type="text" @click="openEdit(row)">编辑</el-button>
